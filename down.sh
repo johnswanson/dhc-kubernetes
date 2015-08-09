@@ -5,7 +5,7 @@ name () {
 		echo "$res"
 }
 
-NUM_NODES=4
+NUM_NODES=1
 for i in `seq 1 $NUM_NODES`
 do
 		nova delete $(name $i) || echo "failed to delete node " $(name $i)

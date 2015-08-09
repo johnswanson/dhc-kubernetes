@@ -1,3 +1,26 @@
+#!/bin/bash
+
+until ! [[ -z $COREOS_PRIVATE_IPV4 ]]; do
+
+		ENV=/etc/environment
+		if [ -z "$ENV" ]; then
+				echo usage: $0 /etc/environment
+				exit 1
+		fi
+		# Test for rw
+		sudo touch $ENV
+		if [ $? -ne 0 ]; then
+				echo exiting, unable to modify: $ENV
+		fi
+		echo "COREOS_PUBLIC_IPV4=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)" > /etc/environment
+		echo "COREOS_PRIVATE_IPV4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)" >> /etc/environment
+		source /etc/environment
+
+done
+
+sed -e 's|--oem=ec2-compat|--from-ec2-metadata=http://169.254.169.254/ --from-file=/user_data.yml|g' -i'' /usr/share/oem/cloud-config.yml
+
+cat > "/user_data.yml" <<EOF
 #cloud-config
 
 ---
@@ -19,16 +42,16 @@ write-files:
 
 coreos:
   etcd2:
-    name: 
+    name: __NAME__
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: =http://$private_ipv4:2380
+    initial-cluster: master.novalocal=http://__MASTER_IP__:2380
     proxy: on
   fleet:
-    public-ip: $public_ipv4
+    public-ip: $COREOS_PRIVATE_IPV4
     metadata: "role=minion"
   flannel:
-    interface: $public_ipv4
+    interface: $COREOS_PRIVATE_IPV4
   units:
     - name: rpcbind.service
       enable: true
@@ -105,9 +128,8 @@ coreos:
         ExecStart=/opt/bin/kubelet \
           --address=0.0.0.0 \
           --port=10250 \
-          --hostname_override=$public_ipv4 \
+          --hostname_override=$COREOS_PRIVATE_IPV4 \
           --api_servers=__MASTER_IP__:8080 \
-          --cloud_provider=__CLOUDPROVIDER__ \
           --allow_privileged=true \
           --cluster_dns=10.100.0.10 \
           --cluster_domain=__DNS_DOMAIN__ \
@@ -122,3 +144,9 @@ coreos:
   update:
     group: __CHANNEL__
     reboot-strategy: off
+EOF
+
+export COREOS_PUBLIC_IPV4
+export COREOS_PRIVATE_IPV4
+
+update_engine_client -update
