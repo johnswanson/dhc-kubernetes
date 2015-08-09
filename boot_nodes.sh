@@ -4,7 +4,7 @@ NUM_NODES=4
 KUBERNETES_VERSION=1.0.1
 MASTER_IP=192.168.100.101
 CHANNEL=alpha
-CLOUD_PROVIDER=""
+CLOUDPROVIDER=""
 DNS_DOMAIN=cluster.local
 
 PUBKEY=openstack.id_rsa.pub
@@ -42,7 +42,7 @@ setup () {
 		sed -e "s|__KUBERNETES_VERSION__|${KUBERNETES_VERSION}|g" -i'' $FILE
 		sed -e "s|__MASTER_IP__|${MASTER_IP}|g" -i'' $FILE
 		sed -e "s|__CHANNEL__|${CHANNEL}|g" -i'' $FILE
-		sed -e "s|__CLOUD_PROVIDER__|${CLOUD_PROVIDER}|g" -i'' $FILE
+		sed -e "s|__CLOUDPROVIDER__|${CLOUDPROVIDER}|g" -i'' $FILE
 		sed -e "s|__DNS_DOMAIN__|${DNS_DOMAIN}|g" -i'' $FILE
 		sed -e "s|__NAME__|${NAME}|g" -i'' $FILE
 }

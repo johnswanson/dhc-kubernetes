@@ -21,17 +21,17 @@ coreos:
   etcd2:
     name: master.novalocal
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    advertise-client-urls: http://$public_ipv4:2379,http://$public_ipv4:4001
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
     initial-cluster-token: k8s_etcd
     listen-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
     initial-advertise-peer-urls: http://$private_ipv4:2380
     initial-cluster: master.novalocal=http://$private_ipv4:2380
     initial-cluster-state: new
   fleet:
-    public-ip: $public_ipv4
+    public-ip: $private_ipv4
     metadata: "role=master"
   flannel:
-    interface: $public_ipv4
+    interface: $private_ipv4
   units:
     - name: rpcbind.service
       enable: true
@@ -127,8 +127,8 @@ coreos:
           --secure_port=6443 \
           --service-cluster-ip-range=10.100.0.0/16 \
           --etcd_servers=http://$private_ipv4:2379 \
-          --public_address_override=$public_ipv4 \
-          --cloud_provider= \
+          --public_address_override=$private_ipv4 \
+          --cloud_provider='' \
           --logtostderr=true \
           --runtime_config=api/v1
         Restart=always
@@ -148,7 +148,7 @@ coreos:
         ExecStart=/opt/bin/kube-controller-manager \
           --service_account_private_key_file=/home/core/kube-serviceaccount.key \
           --master=$private_ipv4:8080 \
-          --cloud_provider= \
+          --cloud_provider='' \
           --pod_eviction_timeout=30s \
           --logtostderr=true
         Restart=always
