@@ -2,7 +2,7 @@
 
 NUM_NODES=4
 KUBERNETES_VERSION=1.0.1
-MASTER_IP=192.168.100.23
+MASTER_IP=192.168.100.101
 CHANNEL=alpha
 CLOUD_PROVIDER=""
 DNS_DOMAIN=cluster.local
@@ -21,7 +21,7 @@ name () {
 
 prepare_kubectl_install () {
 		cp setup.tmpl /tmp/setup
-		setup "" "setup"
+		setup "" "/tmp/setup"
 		chmod +x /tmp/setup
 }
 
@@ -32,19 +32,19 @@ kubectl_install () {
 prepare () {
 		node_name=$(name $1)
 		cp node.yaml /tmp/node.yaml
-		setup $node_name "node.yaml"
+		setup $node_name "/tmp/node.yaml"
 		chmod +x /tmp/node.yaml
 }
 
 setup () {
 		NAME="$1"
 		FILE="$2"
-		sed -e "s|__KUBERNETES_VERSION__|${KUBERNETES_VERSION}|g" -i'' /tmp/$FILE
-		sed -e "s|__MASTER_IP__|${MASTER_IP}|g" -i'' /tmp/$FILE
-		sed -e "s|__CHANNEL__|${CHANNEL}|g" -i'' /tmp/$FILE
-		sed -e "s|__CLOUD_PROVIDER__|${CLOUD_PROVIDER}|g" -i'' /tmp/$FILE
-		sed -e "s|__DNS_DOMAIN__|${DNS_DOMAIN}|g" -i'' /tmp/$FILE
-		sed -e "s|__NAME__|${NAME}|g" -i'' /tmp/$FILE
+		sed -e "s|__KUBERNETES_VERSION__|${KUBERNETES_VERSION}|g" -i'' $FILE
+		sed -e "s|__MASTER_IP__|${MASTER_IP}|g" -i'' $FILE
+		sed -e "s|__CHANNEL__|${CHANNEL}|g" -i'' $FILE
+		sed -e "s|__CLOUD_PROVIDER__|${CLOUD_PROVIDER}|g" -i'' $FILE
+		sed -e "s|__DNS_DOMAIN__|${DNS_DOMAIN}|g" -i'' $FILE
+		sed -e "s|__NAME__|${NAME}|g" -i'' $FILE
 }
 
 launch () {
